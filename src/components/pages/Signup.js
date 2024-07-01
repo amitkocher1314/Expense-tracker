@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../header/Header';
+import { Link } from 'react-router-dom';
+
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -109,7 +111,7 @@ const Signup = () => {
             </button>
           </form>
           <div className="mt-4 text-sm text-gray-600 text-center">
-            Already have an account? <a href="/login" className="text-indigo-600 hover:text-indigo-500">Login here</a>
+            Already have an account? <Link to="/" className="text-indigo-600 hover:text-indigo-500">Login here</Link>
           </div>
         </div>
       </div>

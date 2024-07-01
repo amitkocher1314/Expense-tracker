@@ -1,10 +1,23 @@
 import React from "react";
+import {BrowserRouter as Router, Route,Switch} from "react-router-dom";
 import Signup from "./components/pages/Signup";
 import Login from "./components/pages/Login";
+import Welcome from "./components/pages/Welcome";
 function App() {
   return(
-    // <Signup />
+    <Router>
+     <Switch>
+    <Route path="/signup">   
+    <Signup />
+    </Route>
+    <Route path="/welcome" >
+    <Welcome />
+    </Route>
+    <Route  path="/" >
     <Login />
+    </Route>
+    </Switch>
+    </Router>
   )
 }
 
