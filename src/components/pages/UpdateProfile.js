@@ -1,58 +1,96 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
+import Header from "../header/Header";
 
+const UpdateProfile = () => {
+  const [username, setUsername] = useState('');
+  const [photoURL, setPhotoURL] = useState('');
+  const history = useHistory();
 
-const UpdateProfile=()=>{
-   
-    const [username, setUsername] = useState('');
-    const [photoURL, setPhotoURL] = useState('');
-    const history = useHistory();
-  
-    const handleProfileUpdate = async (e) => {
-      e.preventDefault();
+  useEffect(() => {
+    const fetchUserProfile = async () => {
       const idToken = localStorage.getItem('authToken');
-  
+
       if (!idToken) {
         alert("User is not authenticated");
         return;
       }
-  
+
       try {
-        const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`;
-        const payload = {
-          idToken: idToken,
-          displayName: username,
-          photoUrl: photoURL,
-          returnSecureToken: true
-        };
-  
-        const response = await fetch(url, {
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ idToken }),
         });
-  
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error.message);
+          throw new Error('Failed to fetch user data');
         }
-  
+
         const data = await response.json();
-        console.log('Profile updated successfully', data);
-  
-        alert("Profile updated successfully");
-        history.replace('/welcome');
+        const user = data.users[0];
+
+        setUsername(user.displayName || '');
+        setPhotoURL(user.photoUrl || '');
+
       } catch (error) {
-        alert(error.message);
+        console.error('Error fetching user profile:', error);
       }
-      setUsername('');
-      setPhotoURL('')
     };
 
-return(
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    fetchUserProfile();
+  }, []);
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    const idToken = localStorage.getItem('authToken');
+
+    if (!idToken) {
+      alert("User is not authenticated");
+      return;
+    }
+
+    try {
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=YOUR_API_KEY`; // Replace with your Firebase API key
+      const payload = {
+        idToken: idToken,
+        displayName: username,
+        photoUrl: photoURL,
+        returnSecureToken: true
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message);
+      }
+
+      const data = await response.json();
+      console.log('Profile updated successfully', data);
+
+      alert("Profile updated successfully");
+      history.replace('/welcome');
+    } catch (error) {
+      alert(error.message);
+    }
+
+    setUsername('');
+    setPhotoURL('');
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         <h1 className="text-2xl font-bold">Complete Your Profile</h1>
         <form onSubmit={handleProfileUpdate} className="mt-4 space-y-4 w-80">
           <div>
@@ -94,6 +132,8 @@ return(
           </div>
         </form>
       </div>
-  )
-}
+    </>
+  );
+};
+
 export default UpdateProfile;
