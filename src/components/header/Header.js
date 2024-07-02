@@ -1,8 +1,33 @@
-// Header.js
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import React from 'react';
+const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const history = useHistory();
 
-const Header = ({ isLoggedIn, onLogin, onLogout }) => {
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const onLogin = () => {
+    // Implement your login logic here
+    // For demonstration, we assume login is successful and token is stored in localStorage
+    localStorage.setItem('token', 'your-token');
+    setIsLoggedIn(true);
+    // Redirect to the main page or any other page after login
+    history.push('/welcome');
+  };
+
+  const onLogout = () => {
+    localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
+    // Redirect to the login page after logout
+    history.push('/');
+  };
+
   return (
     <header className="bg-indigo-600 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

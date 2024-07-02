@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link,useHistory } from "react-router-dom";
 import Header from "../header/Header";
 
 const Welcome = () => {
@@ -8,12 +8,13 @@ const Welcome = () => {
   const [photoUrl, setPhotoUrl] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true); // To handle loading state
-
+  const history = useHistory();
+  
   useEffect(() => {
     const fetchUserProfile = async () => {
       const idToken = localStorage.getItem('authToken');
-
       if (!idToken) {
+        history.push('/') 
         return;
       }
 
