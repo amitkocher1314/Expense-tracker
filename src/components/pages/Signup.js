@@ -51,6 +51,7 @@ const Signup = () => {
 
       const data = await response.json();
       console.log('User has successfully signed up', data);
+      alert("Your account created sucessfully,you can now login")
       setIsLoggedIn(true); // Update login status on successful signup
     } catch (error) {
         alert(error.message);

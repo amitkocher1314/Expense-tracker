@@ -6,6 +6,7 @@ const Welcome = () => {
   const [profileComplete, setProfileComplete] = useState(false);
   const [userName, setUserName] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true); // To handle loading state
 
   useEffect(() => {
@@ -38,6 +39,9 @@ const Welcome = () => {
           setUserName(user.displayName);
         }
 
+        // Check if email is verified
+        setEmailVerified(user.emailVerified);
+
       } catch (error) {
         console.error('Error checking user profile:', error);
       } finally {
@@ -47,6 +51,36 @@ const Welcome = () => {
 
     fetchUserProfile();
   }, []);
+
+  const handleSendVerificationEmail = async () => {
+    try {
+      const idToken = localStorage.getItem('authToken');
+
+      if (!idToken) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requestType: 'VERIFY_EMAIL',
+          idToken: idToken,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send verification email');
+      }
+
+      alert('Verification email sent! Please check your inbox.');
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      alert('Failed to send verification email. Please try again later.');
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>; // Display a loading indicator while fetching data
@@ -63,9 +97,17 @@ const Welcome = () => {
             </div>
             <div>
               {profileComplete ? (
-                <Link to="/update-profile" className="text-indigo-600 hover:underline">
-                  Edit Profile
-                </Link>
+                <>
+                  {emailVerified ? (
+                    <Link to="/update-profile" className="text-indigo-600 hover:underline">
+                      Edit Profile
+                    </Link>
+                  ) : (
+                    <button onClick={handleSendVerificationEmail} className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none">
+                      Verify Email
+                    </button>
+                  )}
+                </>
               ) : (
                 <Link to="/update-profile" className="text-red-500 hover:underline">
                   Complete Your Profile
