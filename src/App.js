@@ -4,6 +4,7 @@ import Signup from "./components/pages/Signup";
 import Login from "./components/pages/Login";
 import Welcome from "./components/pages/Welcome";
 import UpdateProfile from "./components/pages/UpdateProfile";
+import ForgotPassword from "./components/pages/ForgotPassword";
 function App() {
   return(
     <Router>
@@ -13,6 +14,9 @@ function App() {
     </Route>
     <Route path="/welcome" >
     <Welcome />
+    </Route>
+    <Route path="/forgot-password" >
+    <ForgotPassword />
     </Route>
     <Route path="/update-profile" >
     <UpdateProfile />
