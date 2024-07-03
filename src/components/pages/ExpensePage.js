@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../header/Header';
 
+
 const ExpensePage = () => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
 
   // Function to fetch expenses from Firebase Realtime Database
   const fetchExpenses = async () => {
@@ -26,42 +28,83 @@ const ExpensePage = () => {
         setExpenses(loadedExpenses);
       }
     } catch (error) {
-     alert('Error fetching expenses:', error.message);
+      alert('Error fetching expenses:', error.message);
     }
   };
 
-  // Function to handle adding expense to Firebase Realtime Database
-  const handleAddExpense = async (e) => {
+  // Function to handle adding or editing an expense in Firebase Realtime Database
+  const handleSaveExpense = async (e) => {
     e.preventDefault();
 
     try {
       const newExpense = { amount, description, category };
-      const response = await fetch('https://authentication-8546d-default-rtdb.firebaseio.com/expenses.json', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newExpense),
-      });
+      let response;
+
+      if (editingExpense) {
+        response = await fetch(`https://authentication-8546d-default-rtdb.firebaseio.com/expenses/${editingExpense.id}.json`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newExpense),
+        });
+      } else {
+        response = await fetch('https://authentication-8546d-default-rtdb.firebaseio.com/expenses.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newExpense),
+        });
+      }
 
       if (!response.ok) {
-        throw new Error('Failed to add expense.');
+        throw new Error('Failed to save expense.');
       }
 
       const data = await response.json();
-      alert('Expense added successfully:', data);
-
-      // Update local state with new expense
-      setExpenses([...expenses, { id: data.name, ...newExpense }]);
+      if (editingExpense) {
+        setExpenses(expenses.map(expense => (expense.id === editingExpense.id ? { id: editingExpense.id, ...newExpense } : expense)));
+      } else {
+        setExpenses([...expenses, { id: data.name, ...newExpense }]);
+      }
 
       // Close modal and reset form fields
       setIsModalOpen(false);
       setAmount('');
       setDescription('');
       setCategory('');
+      setEditingExpense(null);
     } catch (error) {
-     alert('Error adding expense:', error.message);
+      alert('Error saving expense:', error.message);
     }
+  };
+
+  // Function to handle deleting an expense from Firebase Realtime Database
+  const handleDeleteExpense = async (expenseId) => {
+    try {
+      const response = await fetch(`https://authentication-8546d-default-rtdb.firebaseio.com/expenses/${expenseId}.json`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete expense.');
+      }
+
+      setExpenses(expenses.filter(expense => expense.id !== expenseId));
+      alert('Expense successfully deleted');
+    } catch (error) {
+      alert('Error deleting expense:', error.message);
+    }
+  };
+
+  // Function to open modal for editing an expense
+  const openEditModal = (expense) => {
+    setIsModalOpen(true);
+    setAmount(expense.amount);
+    setDescription(expense.description);
+    setCategory(expense.category);
+    setEditingExpense(expense);
   };
 
   // Fetch expenses on component mount
@@ -75,6 +118,10 @@ const ExpensePage = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setAmount('');
+    setDescription('');
+    setCategory('');
+    setEditingExpense(null);
   };
 
   return (
@@ -102,6 +149,14 @@ const ExpensePage = () => {
                 <div className="text-right">
                   <p className="text-lg font-semibold">₹ {expense.amount}</p>
                 </div>
+                <div>
+                  <button onClick={() => openEditModal(expense)}>
+                    <img src="https://icons8.com/icon/64058/edit.png" alt="Edit" />
+                  </button>
+                  <button onClick={() => handleDeleteExpense(expense.id)}>
+                    <img src="https://img.icons8.com/material-outlined/24/000000/trash.png" alt="Delete" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -109,8 +164,8 @@ const ExpensePage = () => {
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
             <div className="bg-white p-8 rounded-md shadow-md max-w-md w-full">
-              <h2 className="text-2xl font-bold mb-4">Add Expense</h2>
-              <form onSubmit={handleAddExpense} className="space-y-6">
+              <h2 className="text-2xl font-bold mb-4">{editingExpense ? 'Edit Expense' : 'Add Expense'}</h2>
+              <form onSubmit={handleSaveExpense} className="space-y-6">
                 <div>
                   <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount</label>
                   <input
@@ -162,7 +217,7 @@ const ExpensePage = () => {
                     type="submit"
                     className="bg-indigo-600 text-white px-4 py-2 rounded-md"
                   >
-                    Add Expense
+                    {editingExpense ? 'Save Changes' : 'Add Expense'}
                   </button>
                 </div>
               </form>
