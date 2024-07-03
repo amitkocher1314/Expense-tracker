@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Header from "../header/Header";
+import React, { useState, useEffect } from 'react';
+import Header from '../header/Header';
 
 const ExpensePage = () => {
   const [amount, setAmount] = useState('');
@@ -8,15 +8,66 @@ const ExpensePage = () => {
   const [expenses, setExpenses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleAddExpense = (e) => {
-    e.preventDefault();
-    const newExpense = { amount, description, category };
-    setExpenses([...expenses, newExpense]);
-    setAmount('');
-    setDescription('');
-    setCategory('');
-    setIsModalOpen(false);
+  // Function to fetch expenses from Firebase Realtime Database
+  const fetchExpenses = async () => {
+    try {
+      const response = await fetch('https://authentication-8546d-default-rtdb.firebaseio.com/expenses.json');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch expenses.');
+      }
+
+      const data = await response.json();
+      if (data) {
+        const loadedExpenses = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setExpenses(loadedExpenses);
+      }
+    } catch (error) {
+     alert('Error fetching expenses:', error.message);
+    }
   };
+
+  // Function to handle adding expense to Firebase Realtime Database
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
+
+    try {
+      const newExpense = { amount, description, category };
+      const response = await fetch('https://authentication-8546d-default-rtdb.firebaseio.com/expenses.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newExpense),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add expense.');
+      }
+
+      const data = await response.json();
+      alert('Expense added successfully:', data);
+
+      // Update local state with new expense
+      setExpenses([...expenses, { id: data.name, ...newExpense }]);
+
+      // Close modal and reset form fields
+      setIsModalOpen(false);
+      setAmount('');
+      setDescription('');
+      setCategory('');
+    } catch (error) {
+     alert('Error adding expense:', error.message);
+    }
+  };
+
+  // Fetch expenses on component mount
+  useEffect(() => {
+    fetchExpenses();
+  }, []); // Empty dependency array ensures fetch happens once on mount
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -42,8 +93,8 @@ const ExpensePage = () => {
         <div className="bg-white p-8 rounded-md shadow-md">
           <h2 className="text-lg font-medium">Total Expense: {expenses.reduce((total, expense) => total + parseFloat(expense.amount), 0)}</h2>
           <ul className="mt-4">
-            {expenses.map((expense, index) => (
-              <li key={index} className="flex justify-between items-center py-2">
+            {expenses.map((expense) => (
+              <li key={expense.id} className="flex justify-between items-center py-2">
                 <div>
                   <p className="text-lg font-semibold">{expense.category}</p>
                   <p className="text-sm italic">{expense.description}</p>
