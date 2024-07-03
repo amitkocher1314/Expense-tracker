@@ -1,133 +1,86 @@
 import React, { useEffect, useState } from "react";
-import { Link,useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import Header from "../header/Header";
 
 const Welcome = () => {
   const [profileComplete, setProfileComplete] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [loading, setLoading] = useState(true); // To handle loading state
+  const [loading, setLoading] = useState(true);
   const history = useHistory();
-  
+
   useEffect(() => {
     const fetchUserProfile = async () => {
-      const idToken = localStorage.getItem('authToken');
+      const idToken = localStorage.getItem("authToken");
+
       if (!idToken) {
-        history.push('/') 
+        history.replace("/");
         return;
       }
 
+      const apiKey = "AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw";
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`;
+
+      const payload = {
+        idToken,
+      };
+
       try {
-        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`, {
-          method: 'POST',
+        const response = await fetch(url, {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ idToken }),
+          body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          const errorData = await response.json();
+          throw new Error(errorData.error.message);
         }
 
         const data = await response.json();
         const user = data.users[0];
+        const { displayName, photoUrl, emailVerified } = user;
 
-        if (user.displayName && user.photoUrl) {
+        if (displayName && photoUrl && emailVerified) {
           setProfileComplete(true);
-          setPhotoUrl(user.photoUrl);
-          setUserName(user.displayName);
         }
-
-        // Check if email is verified
-        setEmailVerified(user.emailVerified);
-
       } catch (error) {
-        console.error('Error checking user profile:', error);
-      } finally {
-        setLoading(false); // Update loading state once done fetching
+        console.error("Error fetching user profile:", error);
       }
+      setLoading(false);
     };
 
     fetchUserProfile();
-  }, []);
-
-  const handleSendVerificationEmail = async () => {
-    try {
-      const idToken = localStorage.getItem('authToken');
-
-      if (!idToken) {
-        throw new Error('User not authenticated');
-      }
-
-      const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          requestType: 'VERIFY_EMAIL',
-          idToken: idToken,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send verification email');
-      }
-
-      alert('Verification email sent! Please check your inbox.');
-    } catch (error) {
-      console.error('Error sending verification email:', error);
-      alert('Failed to send verification email. Please try again later.');
-    }
-  };
-
-  if (loading) {
-    return <div>Loading...</div>; // Display a loading indicator while fetching data
-  }
+  }, [history]);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-gray-100">
       <Header />
-      <div className="flex flex-col items-center min-h-screen bg-gray-100">
-        <div className="w-full bg-white shadow-md">
-          <div className="flex justify-between items-center w-full max-w-7xl mx-auto px-4 py-2">
-            <div>
-              <h1 className="text-xl font-bold">Welcome, {userName || "User"}</h1>
-            </div>
-            <div>
+      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
+        {loading ? (
+          <div className="loader">Loading...</div>
+        ) : (
+          <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-md shadow-md">
+            <h2 className="text-2xl font-bold text-center text-gray-700">
+              Welcome to Expense Tracker
+            </h2>
+            <p className="text-center text-gray-600">
               {profileComplete ? (
                 <>
-                  {emailVerified ? (
-                    <Link to="/update-profile" className="text-indigo-600 hover:underline">
-                      Edit Profile
-                    </Link>
-                  ) : (
-                    <button onClick={handleSendVerificationEmail} className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none">
-                      Verify Email
-                    </button>
-                  )}
+                  Your profile is complete! You can now <Link to="/expenses" className="text-indigo-600 hover:text-indigo-500">go to Expense Page</Link>.
+                  <br />
+                  <Link to="/update-profile" className="text-indigo-600 hover:text-indigo-500">Edit your profile</Link>
                 </>
               ) : (
-                <Link to="/update-profile" className="text-red-500 hover:underline">
-                  Complete Your Profile
-                </Link>
+                <>
+                  Your profile is incomplete! Please <Link to="/profile" className="text-indigo-600 hover:text-indigo-500">complete your profile</Link>.
+                </>
               )}
-            </div>
+            </p>
           </div>
-          {profileComplete && (
-            <div className="flex justify-center items-center mt-4">
-              <img
-                src={photoUrl}
-                alt="Profile"
-                className="rounded-full h-20 w-20"
-              />
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

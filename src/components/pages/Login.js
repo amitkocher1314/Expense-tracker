@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import Header from '../header/Header';
-import {Link,useHistory} from "react-router-dom";
+import { Link, useHistory } from 'react-router-dom';
 
 const Login = () => {
-    const history = useHistory();
-   
-    const [email, setEmail] = useState('');
+  const history = useHistory();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e) => {
@@ -36,21 +35,17 @@ const Login = () => {
       const data = await response.json();
       console.log('User has successfully logged in', data);
       localStorage.setItem('authToken', data.idToken);
-      // Assuming login success, handle success
-      history.replace('/welcome')     
+      history.replace('/welcome');
     } catch (error) {
-      alert(error.message); // Display error using alert
+      alert('Invalid credentials: ' + error.message); // Update alert message
     }
     setEmail('');
     setPassword('');
-
   };
 
-  return  (
+  return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Header Component */}
       <Header />
-
       <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <h2 className="text-2xl font-bold text-center">Login to Expense Tracker</h2>
@@ -68,12 +63,8 @@ const Login = () => {
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
-                  Forgot Password?
-                </Link>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">Forgot Password?</Link>
               </div>
               <input
                 type="password"

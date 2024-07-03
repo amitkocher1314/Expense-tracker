@@ -53,7 +53,7 @@ const UpdateProfile = () => {
     }
 
     try {
-      const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`; // Replace with your Firebase API key
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`;
       const payload = {
         idToken: idToken,
         displayName: username,
