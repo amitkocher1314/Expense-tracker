@@ -1,41 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setExpenses, addExpense, updateExpense, deleteExpense, setError, setStatus } from '../../Store/expensesReducer';
 import Header from '../header/Header';
-
 
 const ExpensePage = () => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [expenses, setExpenses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
 
-  // Function to fetch expenses from Firebase Realtime Database
+  const dispatch = useDispatch();
+  const expenses = useSelector(state => state.expenses.expenses);
+  const total = useSelector(state => state.expenses.total);
+
   const fetchExpenses = async () => {
+    dispatch(setStatus('loading'));
     try {
       const response = await fetch('https://authentication-8546d-default-rtdb.firebaseio.com/expenses.json');
-
       if (!response.ok) {
         throw new Error('Failed to fetch expenses.');
       }
-
       const data = await response.json();
-      if (data) {
-        const loadedExpenses = Object.keys(data).map(key => ({
-          id: key,
-          ...data[key]
-        }));
-        setExpenses(loadedExpenses);
-      }
+      console.log('Fetched data:', data); // Log fetched data
+      const loadedExpenses = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+      console.log('Loaded expenses:', loadedExpenses); // Log transformed data
+      dispatch(setExpenses(loadedExpenses));
+      dispatch(setStatus('succeeded'));
     } catch (error) {
-      alert('Error fetching expenses:', error.message);
+      console.error('Error fetching expenses:', error); // Log any errors
+      dispatch(setError(error.message));
+      dispatch(setStatus('failed'));
     }
   };
 
-  // Function to handle adding or editing an expense in Firebase Realtime Database
   const handleSaveExpense = async (e) => {
     e.preventDefault();
-
     try {
       const newExpense = { amount, description, category };
       let response;
@@ -43,62 +43,44 @@ const ExpensePage = () => {
       if (editingExpense) {
         response = await fetch(`https://authentication-8546d-default-rtdb.firebaseio.com/expenses/${editingExpense.id}.json`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newExpense),
         });
+        if (!response.ok) throw new Error('Failed to update expense.');
+        dispatch(updateExpense({ id: editingExpense.id, ...newExpense }));
       } else {
         response = await fetch('https://authentication-8546d-default-rtdb.firebaseio.com/expenses.json', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newExpense),
         });
+        if (!response.ok) throw new Error('Failed to add expense.');
+        const data = await response.json();
+        dispatch(addExpense({ id: data.name, ...newExpense }));
       }
-
-      if (!response.ok) {
-        throw new Error('Failed to save expense.');
-      }
-
-      const data = await response.json();
-      if (editingExpense) {
-        setExpenses(expenses.map(expense => (expense.id === editingExpense.id ? { id: editingExpense.id, ...newExpense } : expense)));
-      } else {
-        setExpenses([...expenses, { id: data.name, ...newExpense }]);
-      }
-
-      // Close modal and reset form fields
       setIsModalOpen(false);
       setAmount('');
       setDescription('');
       setCategory('');
       setEditingExpense(null);
     } catch (error) {
-      alert('Error saving expense:', error.message);
+      alert(error.message);
     }
   };
 
-  // Function to handle deleting an expense from Firebase Realtime Database
   const handleDeleteExpense = async (expenseId) => {
     try {
       const response = await fetch(`https://authentication-8546d-default-rtdb.firebaseio.com/expenses/${expenseId}.json`, {
         method: 'DELETE',
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete expense.');
-      }
-
-      setExpenses(expenses.filter(expense => expense.id !== expenseId));
+      if (!response.ok) throw new Error('Failed to delete expense.');
+      dispatch(deleteExpense(expenseId));
       alert('Expense successfully deleted');
     } catch (error) {
-      alert('Error deleting expense:', error.message);
+      alert(error.message);
     }
   };
 
-  // Function to open modal for editing an expense
   const openEditModal = (expense) => {
     setIsModalOpen(true);
     setAmount(expense.amount);
@@ -107,15 +89,11 @@ const ExpensePage = () => {
     setEditingExpense(expense);
   };
 
-  // Fetch expenses on component mount
   useEffect(() => {
     fetchExpenses();
-  }, []); // Empty dependency array ensures fetch happens once on mount
+  }, []);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
+  const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
     setAmount('');
@@ -128,37 +106,43 @@ const ExpensePage = () => {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Header />
       <div className="container mx-auto px-4 py-8">
+      {total > 10000 && (
+  <button className="bg-yellow-500 text-white px-4 py-2 rounded-md mt-4">
+    Activate Premium
+  </button>
+)}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Expense Tracker</h1>
-          <button
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md"
-            onClick={openModal}
-          >
+          <button className="bg-indigo-600 text-white px-4 py-2 rounded-md" onClick={openModal}>
             Add new expense
           </button>
         </div>
         <div className="bg-white p-8 rounded-md shadow-md">
-          <h2 className="text-lg font-medium">Total Expense: {expenses.reduce((total, expense) => total + parseFloat(expense.amount), 0)}</h2>
+          <h2 className="text-lg font-medium">Total Expense: ₹{total}</h2>
           <ul className="mt-4">
-            {expenses.map((expense) => (
-              <li key={expense.id} className="flex justify-between items-center py-2">
-                <div>
-                  <p className="text-lg font-semibold">{expense.category}</p>
-                  <p className="text-sm italic">{expense.description}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-semibold">₹ {expense.amount}</p>
-                </div>
-                <div>
-                  <button onClick={() => openEditModal(expense)}>
-                    <img src="https://icons8.com/icon/64058/edit.png" alt="Edit" />
-                  </button>
-                  <button onClick={() => handleDeleteExpense(expense.id)}>
-                    <img src="https://img.icons8.com/material-outlined/24/000000/trash.png" alt="Delete" />
-                  </button>
-                </div>
-              </li>
-            ))}
+            {expenses && expenses.length > 0 ? (
+              expenses.map((expense) => (
+                <li key={expense.id} className="flex justify-between items-center py-2">
+                  <div>
+                    <p className="text-lg font-semibold">{expense.category}</p>
+                    <p className="text-sm italic">{expense.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold">₹ {expense.amount}</p>
+                  </div>
+                  <div>
+                    <button onClick={() => openEditModal(expense)}>
+                      <img src="https://icons8.com/icon/64058/edit.png" alt="Edit" />
+                    </button>
+                    <button onClick={() => handleDeleteExpense(expense.id)}>
+                      <img src="https://img.icons8.com/material-outlined/24/000000/trash.png" alt="Delete" />
+                    </button>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p>No expenses found.</p>
+            )}
           </ul>
         </div>
         {isModalOpen && (
@@ -206,17 +190,10 @@ const ExpensePage = () => {
                   </select>
                 </div>
                 <div className="flex justify-end space-x-4">
-                  <button
-                    type="button"
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md"
-                    onClick={closeModal}
-                  >
+                  <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded-md" onClick={closeModal}>
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md"
-                  >
+                  <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded-md">
                     {editingExpense ? 'Save Changes' : 'Add Expense'}
                   </button>
                 </div>
