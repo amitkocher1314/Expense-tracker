@@ -1,7 +1,10 @@
+// ExpensePage.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setExpenses, addExpense, updateExpense, deleteExpense, setError, setStatus } from '../../Store/expensesReducer';
 import Header from '../header/Header';
+import { toggleTheme } from '../../Store/themeReducer';
+import './ExpensePage.css';
 
 const ExpensePage = () => {
   const [amount, setAmount] = useState('');
@@ -9,6 +12,7 @@ const ExpensePage = () => {
   const [category, setCategory] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
+  const theme = useSelector(state => state.theme);
 
   const dispatch = useDispatch();
   const expenses = useSelector(state => state.expenses.expenses);
@@ -89,6 +93,21 @@ const ExpensePage = () => {
     setEditingExpense(expense);
   };
 
+  const handleDownloadCSV = () => {
+    const csvRows = [
+      ['ID', 'Amount', 'Description', 'Category'],
+      ...expenses.map(exp => [exp.id, exp.amount, exp.description, exp.category])
+    ];
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', 'expenses.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetchExpenses();
   }, []);
@@ -103,18 +122,19 @@ const ExpensePage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className={`flex flex-col min-h-screen ${theme}`}>
       <Header />
       <div className="container mx-auto px-4 py-8">
-      {total > 10000 && (
-  <button className="bg-yellow-500 text-white px-4 py-2 rounded-md mt-4">
-    Activate Premium
-  </button>
-)}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Expense Tracker</h1>
           <button className="bg-indigo-600 text-white px-4 py-2 rounded-md" onClick={openModal}>
             Add new expense
+          </button>
+          <button className="bg-gray-600 text-white px-4 py-2 rounded-md" onClick={() => dispatch(toggleTheme())}>
+            Toggle Theme
+          </button>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md" onClick={handleDownloadCSV}>
+            Download CSV
           </button>
         </div>
         <div className="bg-white p-8 rounded-md shadow-md">
