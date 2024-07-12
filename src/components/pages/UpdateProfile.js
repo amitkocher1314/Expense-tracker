@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import Header from "../header/Header";
-
+import { useSelector } from 'react-redux';
+import './ExpensePage.css';
+ 
 const UpdateProfile = () => {
   const [username, setUsername] = useState('');
   const [photoURL, setPhotoURL] = useState('');
   const history = useHistory();
-
+  const theme = useSelector((state) => state.theme);
   useEffect(() => {
     const fetchUserProfile = async () => {
       const idToken = localStorage.getItem('authToken');
@@ -88,9 +89,8 @@ const UpdateProfile = () => {
   };
 
   return (
-    <>
-      <Header />
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className={`container mx-auto px-4 py-8 ${theme}`}>
+      <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold">Complete Your Profile</h1>
         <form onSubmit={handleProfileUpdate} className="mt-4 space-y-4 w-80">
           <div>
@@ -132,7 +132,7 @@ const UpdateProfile = () => {
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 

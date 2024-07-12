@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import Header from '../header/Header';
 import { Link, useHistory } from 'react-router-dom';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const history = useHistory();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,18 +34,22 @@ const Login = () => {
       const data = await response.json();
       console.log('User has successfully logged in', data);
       localStorage.setItem('authToken', data.idToken);
+      localStorage.setItem('userId', data.localId);
+      // Call the onLogin function passed from App component to update the login state
+      onLogin();
+
+      // Use history.replace to navigate to the welcome page
       history.replace('/welcome');
     } catch (error) {
       alert('Invalid credentials: ' + error.message); // Update alert message
     }
+
     setEmail('');
     setPassword('');
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <Header />
-      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
+     <div className="flex  items-center justify-center px-4 sm:px-6 lg:px-8  bg-gray-100 min-h-screen">
         <div className="w-full max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <h2 className="text-2xl font-bold text-center">Login to Expense Tracker</h2>
           <form onSubmit={handleLogin} className="space-y-6">
@@ -87,7 +90,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

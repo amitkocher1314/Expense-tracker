@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import Header from "../header/Header";
+import { useSelector } from 'react-redux';
+import './ExpensePage.css';
 
 const Welcome = () => {
   const [profileComplete, setProfileComplete] = useState(false);
   const [loading, setLoading] = useState(true);
   const history = useHistory();
-
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [name, setName] = useState('');
+  const theme = useSelector((state) => state.theme);
   useEffect(() => {
     const fetchUserProfile = async () => {
       const idToken = localStorage.getItem("authToken");
@@ -43,6 +46,8 @@ const Welcome = () => {
 
         if (displayName && photoUrl && emailVerified) {
           setProfileComplete(true);
+          setPhotoUrl(photoUrl);
+          setName(displayName);
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -54,16 +59,25 @@ const Welcome = () => {
   }, [history]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <Header />
+    <div className={`flex flex-col min-h-screen ${theme}`}>
+    <div className="flex flex-col min-h-screen ">
       <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="loader">Loading...</div>
         ) : (
           <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-md shadow-md">
             <h2 className="text-2xl font-bold text-center text-gray-700">
-              Welcome to Expense Tracker
+              Welcome {name}
             </h2>
+            <div className="text-center">
+              <div className="relative inline-block">
+                <img
+                  src= {photoUrl}
+                  alt="Profile"
+                  className="rounded-full h-40 w-40 object-cover mx-auto"
+                />
+              </div>
+            </div>
             <p className="text-center text-gray-600">
               {profileComplete ? (
                 <>
@@ -73,13 +87,14 @@ const Welcome = () => {
                 </>
               ) : (
                 <>
-                  Your profile is incomplete! Please <Link to="/profile" className="text-indigo-600 hover:text-indigo-500">complete your profile</Link>.
+                  Your profile is incomplete! Please <Link to="/update-profile" className="text-indigo-600 hover:text-indigo-500">complete your profile</Link>.
                 </>
               )}
             </p>
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

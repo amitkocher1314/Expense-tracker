@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Header from '../header/Header';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +8,7 @@ const ForgotPassword = () => {
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
+     setMessage('');
 
     try {
       const apiKey = 'AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw';
@@ -37,15 +36,12 @@ const ForgotPassword = () => {
     } catch (error) {
       alert(error.message); // Show error using alert
     }
-
+    setEmail('')
     setLoading(false);
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <Header />
-
-      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 min-h-screen bg-gray-100">
         <div className="w-full max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <h2 className="text-2xl font-bold text-center">Reset Password</h2>
           <form onSubmit={handlePasswordReset} className="space-y-6">
@@ -70,10 +66,9 @@ const ForgotPassword = () => {
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </form>
-          {message && <div className="mt-4 text-sm text-green-600 text-center">{message}</div>}
+         {/* {message && <div className="mt-4 text-sm text-green-600 text-center">{message}</div>} */}
         </div>
       </div>
-    </div>
   );
 };
 
