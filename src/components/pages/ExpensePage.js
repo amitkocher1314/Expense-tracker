@@ -48,6 +48,7 @@ const ExpensePage = () => {
           body: JSON.stringify(newExpense),
         });
         if (!response.ok) throw new Error('Failed to update expense.');
+        alert("Updated Successfully");
         dispatch(updateExpense({ id: editingExpense.id, ...newExpense }));
       } else {
         response = await fetch(`https://authentication-8546d-default-rtdb.firebaseio.com/expenses/${userId}.json`, {
@@ -58,6 +59,7 @@ const ExpensePage = () => {
         if (!response.ok) throw new Error('Failed to add expense.');
         const data = await response.json();
         dispatch(addExpense({ id: data.name, ...newExpense }));
+        alert("Expense Added Successfully")
       }
       setIsModalOpen(false);
       setAmount('');

@@ -12,7 +12,7 @@ const Header = ({ isLoggedIn, handleLogout }) => {
   }, [isLoggedIn, history]);
 
   return (
-    <header className="relative bg-indigo-600 shadow-2xl rounded-sm border-t-1  mt-2 mb-2">
+    <header className="relative bg-indigo-600 top-0 shadow-2xl rounded-sm border-t-1  mt-1 mb-1">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="text-white text-xl font-bold">Expense Tracker</div>
         <div className="flex flex-1 justify-center space-x-4">

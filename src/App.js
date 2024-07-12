@@ -30,7 +30,7 @@ function App() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; // Show a loading indicator while checking auth status
+    return <div>Loading...</div>; 
   }
 
   return (

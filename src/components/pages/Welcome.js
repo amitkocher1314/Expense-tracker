@@ -60,7 +60,7 @@ const Welcome = () => {
 
   return (
     <div className={`flex flex-col min-h-screen ${theme}`}>
-    <div className="flex flex-col min-h-screen ">
+   
       <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="loader">Loading...</div>
@@ -94,7 +94,7 @@ const Welcome = () => {
           </div>
         )}
       </div>
-    </div>
+  
     </div>
   );
 };
