@@ -45,12 +45,13 @@ const Welcome = () => {
         const user = data.users[0];
         const { displayName, photoUrl, emailVerified } = user;
 
-        setName(displayName);
-        setPhotoUrl(photoUrl);
-
+     
         if (displayName && photoUrl && emailVerified) {
           setProfileComplete(true);
         }
+        setName(displayName);
+        setPhotoUrl(photoUrl);
+
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
