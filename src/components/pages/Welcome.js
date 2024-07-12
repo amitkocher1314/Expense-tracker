@@ -47,10 +47,11 @@ const Welcome = () => {
 
         setName(displayName);
         setPhotoUrl(photoUrl);
-
-        if (displayName && photoUrl && emailVerified) {
-          setProfileComplete(true);
-        }
+        setProfileComplete(true);
+        // if (displayName && photoUrl && emailVerified) {
+        
+        
+        // }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
