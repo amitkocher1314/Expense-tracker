@@ -10,6 +10,7 @@ const Welcome = () => {
   const [photoUrl, setPhotoUrl] = useState('');
   const [name, setName] = useState('');
   const theme = useSelector((state) => state.theme);
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       const idToken = localStorage.getItem("authToken");
@@ -44,10 +45,11 @@ const Welcome = () => {
         const user = data.users[0];
         const { displayName, photoUrl, emailVerified } = user;
 
+        setName(displayName);
+        setPhotoUrl(photoUrl);
+
         if (displayName && photoUrl && emailVerified) {
           setProfileComplete(true);
-          setPhotoUrl(photoUrl);
-          setName(displayName);
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -60,7 +62,6 @@ const Welcome = () => {
 
   return (
     <div className={`flex flex-col min-h-screen ${theme}`}>
-   
       <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="loader">Loading...</div>
@@ -72,7 +73,7 @@ const Welcome = () => {
             <div className="text-center">
               <div className="relative inline-block">
                 <img
-                  src= {photoUrl}
+                  src={photoUrl}
                   alt="Profile"
                   className="rounded-full h-40 w-40 object-cover mx-auto"
                 />
@@ -94,7 +95,6 @@ const Welcome = () => {
           </div>
         )}
       </div>
-  
     </div>
   );
 };

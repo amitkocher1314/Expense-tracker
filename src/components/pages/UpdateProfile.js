@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import './ExpensePage.css';
- 
+
 const UpdateProfile = () => {
   const [username, setUsername] = useState('');
   const [photoURL, setPhotoURL] = useState('');
   const history = useHistory();
   const theme = useSelector((state) => state.theme);
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       const idToken = localStorage.getItem('authToken');
@@ -35,7 +36,6 @@ const UpdateProfile = () => {
 
         setUsername(user.displayName || '');
         setPhotoURL(user.photoUrl || '');
-
       } catch (error) {
         console.error('Error fetching user profile:', error);
       }
@@ -56,7 +56,7 @@ const UpdateProfile = () => {
     try {
       const url = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw`;
       const payload = {
-        idToken: idToken,
+        idToken,
         displayName: username,
         photoUrl: photoURL,
         returnSecureToken: true
@@ -89,7 +89,7 @@ const UpdateProfile = () => {
   };
 
   return (
-    <div className={` mx-auto px-4 py-8 ${theme}`}>
+    <div className={`mx-auto px-4 py-8 ${theme}`}>
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold">Complete Your Profile</h1>
         <form onSubmit={handleProfileUpdate} className="mt-4 space-y-4 w-80">
