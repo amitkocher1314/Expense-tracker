@@ -90,7 +90,7 @@ const UpdateProfile = () => {
 
   return (
     <div className={`mx-auto px-4 py-8 ${theme}`}>
-      <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="flex  flex-col -mt-20 items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold">Complete Your Profile</h1>
         <form onSubmit={handleProfileUpdate} className="mt-4 space-y-4 w-80">
           <div>

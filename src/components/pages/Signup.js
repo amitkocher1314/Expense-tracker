@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link ,useHistory } from 'react-router-dom';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
+const history = useHistory();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,6 +40,7 @@ const Signup = () => {
       const data = await response.json();
       console.log('User has successfully signed up', data);
       alert("Your account created successfully, you can now login");
+      history.replace('/')
     } catch (error) {
       alert('Invalid credentials: ' + error.message); // Update alert message
     }
@@ -50,7 +51,7 @@ const Signup = () => {
 
   return (
   <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-100 min-h-screen">
-        <div className="w-full max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="w-full -mt-16 max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <h2 className="text-2xl font-bold text-center">Create new account</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>

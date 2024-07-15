@@ -3,12 +3,11 @@ import React, { useState } from 'react';
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+ 
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
-     setMessage('');
 
     try {
       const apiKey = 'AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw';
@@ -31,7 +30,6 @@ const ForgotPassword = () => {
         throw new Error(errorData.error.message);
       }
 
-      setMessage('Password reset link sent to your verified email-id. Please check your mail inbox.');
       alert('Password reset link sent to your verified email-id. Please check your mail inbox.')
     } catch (error) {
       alert(error.message); // Show error using alert
@@ -42,7 +40,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 min-h-screen bg-gray-100">
-        <div className="w-full max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="w-full -mt-16 max-w-md space-y-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <h2 className="text-2xl font-bold text-center">Reset Password</h2>
           <form onSubmit={handlePasswordReset} className="space-y-6">
             <div>

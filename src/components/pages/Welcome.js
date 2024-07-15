@@ -9,6 +9,7 @@ const Welcome = () => {
   const history = useHistory();
   const [photoUrl, setPhotoUrl] = useState('');
   const [name, setName] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
   const theme = useSelector((state) => state.theme);
 
   useEffect(() => {
@@ -47,11 +48,12 @@ const Welcome = () => {
 
         setName(displayName);
         setPhotoUrl(photoUrl);
-        setProfileComplete(true);
-        // if (displayName && photoUrl && emailVerified) {
+        setEmailVerified(emailVerified);
+
+        if (displayName && photoUrl && emailVerified) {
+          setProfileComplete(true);
+        }
         
-        
-        // }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -61,9 +63,45 @@ const Welcome = () => {
     fetchUserProfile();
   }, [history]);
 
+  const handleSendVerificationEmail = async () => {
+    const idToken = localStorage.getItem("authToken");
+
+    if (!idToken) {
+      history.replace("/");
+      return;
+    }
+
+    const apiKey = "AIzaSyCsmq92tnnIqmTW8V5Zas257RF0G2lRtXw";
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`;
+
+    const payload = {
+      requestType: "VERIFY_EMAIL",
+      idToken,
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message);
+      }
+
+      alert("Verification email sent! Please check your inbox.");
+    } catch (error) {
+      alert("Error sending verification email:", error);
+    }
+  };
+
   return (
-    <div className={`flex flex-col min-h-screen ${theme}`}>
-      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className={`flex  min-h-screen ${theme}`}>
+      <div className="flex -mt-16 flex-1 items-center justify-center px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="loader">Loading...</div>
         ) : (
@@ -74,12 +112,22 @@ const Welcome = () => {
             <div className="text-center">
               <div className="relative inline-block">
                 <img
-                  src={photoUrl}
-                  alt="Profile"
+                  src={photoUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
+                  alt="profile"
                   className="rounded-full h-40 w-40 object-cover mx-auto"
                 />
               </div>
             </div>
+            {!emailVerified && (
+              <div className="text-center mt-4">
+                <button
+                  onClick={handleSendVerificationEmail}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md"
+                >
+                  Verify Email
+                </button>
+              </div>
+            )}
             <p className="text-center text-gray-600">
               {profileComplete ? (
                 <>

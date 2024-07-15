@@ -8,29 +8,35 @@ import ForgotPassword from "./components/pages/ForgotPassword";
 import ExpensePage from "./components/pages/ExpensePage";
 import Header from "./components/header/Header";
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
+    
+  }
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
       setIsLoggedIn(true);
     }
-    setIsLoading(false); // Set loading to false once the check is done
+    setIsLoading(false);
   }, []);
 
+  
   const handleLogin = () => {
     setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    setIsLoggedIn(false);
+    
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   return (
